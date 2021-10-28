@@ -171,18 +171,23 @@ public final class ReciprocalArraySum {
                                                 final int numTasks) {
 
         ReciprocalArraySumTask[] chunks = new ReciprocalArraySumTask[numTasks];
-        for (int i = 0; i < numTasks; i++) {
+        int i;
+        for (i = 0; i < numTasks - 1; i++) {
             int start = ReciprocalArraySum.getChunkStartInclusive(i, numTasks, input.length);
             int end = ReciprocalArraySum.getChunkEndExclusive(i, numTasks, input.length);
             chunks[i] = new ReciprocalArraySumTask(start, end, input);
             chunks[i].fork();
         }
+        chunks[i] = new ReciprocalArraySumTask(chunks[i - 1].endIndexExclusive, input.length, input);
+        chunks[i].compute();
+
 
         double sum = 0;
-        for (int i = 0; i < numTasks; i++) {
+        for (i = 0; i < numTasks - 1; i++) {
             chunks[i].join();
             sum += chunks[i].value;
         }
+        sum += chunks[i].value;
 
         return sum;
     }
